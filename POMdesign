@@ -75,4 +75,28 @@ def getTextByCssValue(browser,cssSelector):
   return browser.execute_script(callJS.getContentByValue(cssSelector))
   
 
+#Helper.databasel.py
+import sys,pymysql
+import config
+conf = config.Conf()
 
+def queryfromDb(sql,DB);
+  '''数据库查询方法'''
+  try:
+    conn = pymysql.connect(conf.DATABASE['host'],conf.DATABASE['username'],conf.DATABASE['password'],conf.DATABASE['DB'],charset='utf-8')
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    rows = cursor.fetchall()
+    data_list = []
+    from row in rows:
+      data_list.append(str(row[0]))     #将数据结构转成集合str类型
+    return data_list
+    
+  exception Exception as e:
+    print("some error")
+    print(e)
+    pass
+  else:
+    pass
+  finally:
+    pass
