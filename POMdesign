@@ -86,11 +86,12 @@ def queryfromDb(sql,DB);
     conn = pymysql.connect(conf.DATABASE['host'],conf.DATABASE['username'],conf.DATABASE['password'],conf.DATABASE['DB'],charset='utf-8')
     cursor = conn.cursor()
     cursor.execute(sql)
-    rows = cursor.fetchall()
+    rows = cursor.fetchall() #return rows (查询多列数据时 直接return rows)
     data_list = []
     from row in rows:
       data_list.append(str(row[0]))     #将数据结构转成集合str类型
     return data_list
+  
     
   exception Exception as e:
     print("some error")
