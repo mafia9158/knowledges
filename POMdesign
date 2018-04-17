@@ -1,5 +1,78 @@
 TestData 测速数据 用例
 Locators 定位器
 Pages 页面类
-helper 基础类
+helper 基础类 辅助行功能
 TestCases 测速类
+
+#locators.py
+from selenium.webdriver.common.by import By
+class MainPageLocators(object):
+  login_btn = (By.ID,'submitlogin')
+  tips = (BY.TAG,'sometips')
+ 
+#basepage.py
+from locators.py import MainPageLocators
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import *
+
+calss BasePage(object):
+  def __init__(self,driver):
+    self.driver = driver
+    self.driver.maximize_window()
+    self.driver.implicitly_wait(30)
+  
+  def FindElement(self,*locator):
+    try:
+      return self.driver.find_element(*locator)
+    except ElementNotVisibleException as e:
+      pass
+    except NoSuchElementException as e:
+      pass
+    else:
+      print("nothing",locator)
+      return False
+    finally:
+      pass
+  
+  
+   def KeysClick(self,keys):
+    try:
+      tips = WebDriverWait(self.driver,8).until_not(EC.element_to_be_clickable(MainPageLocators.tips),'time out')
+      if tips is False:
+        keys.click()
+    except ElementNotVisibleException as e:
+      pass
+    except NoSuchElementException as e:
+      pass
+    except TimeOutException as e:
+      pass
+    else:
+      #print("nothing")
+      return False
+    finally:
+      pass
+  
+#page.py
+from locators.py import MainPageLocators
+from basepage import BasePage
+class  somepage(BasePage):
+  def pageFuntion(self):
+
+#helper.callJS.py jquery定位方法
+def getContentByInnerText(cssSelector):
+  return  r'var elements = document.querySelector("'+cssSelector+'"); if(elements == null || elements.length === 0 ) {return "not found";} if(elements.length > 1) {return elements[0].innerText;} return elements.innerText;'
+
+def getContentByValue(cssCelector):
+ return  r'var elements = document.querySelector("'+cssSelector+'"); if(elements == null || elements.length === 0 ) {return "not found";} if(elements.length > 1) {return elements[0].value;} return elements.value;'
+ 
+#helper.unit.py  通过jquery定位获取元素文本
+from helper import callJS
+def getTextByInnerText(browser,cssSelector):
+  return browser.execute_script(callJS.getContentByInnerText(cssSelector))
+  
+def getTextByCssValue(browser,cssSelector):
+  return browser.execute_script(callJS.getContentByValue(cssSelector))
+  
+
+
