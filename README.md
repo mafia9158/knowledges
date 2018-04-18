@@ -45,3 +45,8 @@ do
        $COMMAND
      fi
  done
+
+
+
+#php 完整configure
+./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/etc/php --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-zlib --with-bz2 --with-gd --with-png-dir --with-jpeg-dir --with-freetype-dir --enable-gd-native-ttf --with-iconv --enable-xml --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization --enable-mbregex --enable-fpm --enable-mbstring --with-openssl --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --without-pear --enable-session --with-mrrypt --with-curl --enable-ftp
