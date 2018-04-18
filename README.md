@@ -20,6 +20,7 @@ scp user@ip:/remote path/files local path/files
 1. 创建data目录 cnf 文件
 2. 执行mysql初始化
 mysql/scripts/mysql_install_db --basedir=/mysqldir/ --datadir=/实例数据文件夹路径 --defaults-file=/实例.cnf文件
+/mysqlpath/bin/mysql -S /实例datapath/run/mysql.sock  #指定实例访问
 
 #shell 按行读取文件
 dirname=$1'dirname'
