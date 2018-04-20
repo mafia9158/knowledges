@@ -1,0 +1,15 @@
+#php func
+#执行系统命令
+passthru("cd $projectDir && python".impload(' ',$value));  
+
+array_unshift($value,'./runp.py')  #'./runp.py' 左侧拼接
+
+
+#index func
+<form action='run.php' method='post'>
+  <span>address:</span>
+  <input name='ck[]' value="http://..../api/" type="text">
+  <input id='a1' name="ck[]" type="checkbox"><label>get captcha</label>
+  <input id='a2' name="ck[]" type="checkbox"><label>login action</label>
+  <input type='submit' value="submit">
+</form>
