@@ -1,0 +1,288 @@
+#helper/testmap.py
+import copy
+
+exec('from testcase import auth' )
+
+testMap={}
+testMap['a1'] = {'testFuncName':auth.Auth('test_a1_getCaptha')}
+testMap['a2'] = {'testFuncName':auth.Auth('test_a2_login')}
+
+def getName(key):
+  return copy.deepcopy(testMap[key])
+-----------------------------------------------------------------------------------------------------
+
+#helper/api.py
+import config,copy
+conf = config.Conf()
+
+api={}
+api['CAPTCHA']={'address':'captcha','method':'get','desc':'get captha'}
+api['LOGIN']={'address':'auth/login','method':'post','desc':'登录'}
+
+def get(key):
+    r= copy.deepcopy(api[key])
+    if 'http' in r['address']:      #address 带http字符 直接使用
+        return r
+    r['address'] =conf.Domain + r['address']
+    return r
+
+-----------------------------------------------------------------------------------------------------
+#run.py (python获取传参 运行指定测试方法)
+import unittest,HTMLTesetRunner,sys config
+from helper import unit
+conf = config.Conf()
+exec('from testcase import auth')
+
+testunit = unitest.TestSuite()
+operator = {'auth':auth.Auth,'user':user.User}
+
+for i in range(1,len(sys.argv)):    #从第1个参数到最后一个参数间（第0个参数看具体指定类型 可能是ip）
+  for key ,val in operator.item():  #
+    if key == sys.argv[i]:
+      testunit.addTest(unittest.makeSuite(val))
+
+unit.clearTestData()
+
+filename = conf.report_dir + '.html'
+
+fp = open(filename,'wb')
+runner = HTMLTestRunner.HTMLTestRunner(
+    stream = fp,
+    title = conf.Title,
+    descritption = u'测试用例执行情况',
+)
+runner.run(testunit)
+unit.makeDetailReport(conf.file_dir,conf.report_name,conf.excute_time,conf.Title,conf.Logs);
+
+-----------------------------------------------------------------------------------------------------
+#config.py
+#配置一些常量
+import time,sys
+
+KEY = ''
+TOKEN = ''
+class Conf():
+  Logs = []
+  Title = 'xx report'
+  Project = 'pj name'
+  Domain = sys.argv[1];  #可以接受从外部参入的参数
+  excute_time = time.strftime("%Y%m%d%H%M%s" , timie.localtime()) #格式化当前时间
+  report_dir = 'paht' + excute_time
+  file_dir = 'path' + excute_time
+  report_name = 'report name' + excute_time
+  #可以有其他需要的常量配置
+  
+-----------------------------------------------------------------------------------------------------
+#helper/unit.py  #定义一些常用方法
+import json,codecs,time,csv,sys,hashlib 
+ 
+ #构建rest风格接口URL资源参
+ def makeResultUrl(url,params):
+  uSplit = url.split('$')
+  result = ''
+  for x in range(0,len(uSplit)):
+    result += uSplit[x]
+    if x < len(params):
+      result += str(params[x])
+  return result
+ 
+ #生成详细报告
+ def makeDetailReport(fileDir,reportName,excuteTime,Ttile,Logs):
+    fileName = fileDir
+    pf = codecs.open(fileName +'.html','w+','utf-8')
+    pf.write('<html>')
+    pr.write('<head>')
+    pf.write('  <title>'+Title+'</title>')
+    pf.write('  <meta charset="utf-8">')
+    pf.write('  <script tu[e="text/javascript" src="jquery.min.js"></stript>')    #可以下载这个js 放到指定路径下这里获取
+    pf.write('  <link rel="stylesheet" type="text/css" herf="amazeui.min.css">')  #可以下载这个css 放到指定路径下这里获取
+    pf.write('</head>')
+    pf.write('<body>')
+    pf.write('<div class="am-container" style="background-color:white;">')
+    pf.write('<h1 style="text-align: center; margin-top: 20px;">'+title+'</h1>')
+    pf.write('<hr>')
+    pf.write("<h2> 报告生成时间："+time.strftime("%Y-%m-%d %H:%M:%s",time.localtime())+"</h2>")
+    pf.write('<hr>')
+    pf.write('<iframe src="'+reportName+'" style="height:400px;width:120%>" </iframe>')
+    for item in logs:
+        result = '<span style = "color:green">调用成功</span>'
+        if item['error']:
+          result = '<span style = "color:green">调用失败</span>'
+        try:
+            if item['result']['error']:
+                result = '<span style = "color:green">调用失败</span>'
+        except Exception as e:
+          pass
+        pf.write("<h2>测试接口："+item['apiName']+"</h2>")
+        pf.write("<div>调用类型："+item['type']+"</div>")
+        pf.write("<div调用结果：>"+result+"</div>")
+        pf.write("<div>调用方法"+item['method']+"</div>")
+        pf.write("<div>调用时间："+item['startTime']+"</div>")
+        pf.write("<div>接口响应时间：<code>"+str(item['wasteTiem'])+"</code></div>")
+        pf.write("<div>接口地址:<br/><pre>"+item['address']+"</pre></div>")
+        pf.write("<div>head:<br/><pre>"+json.dumps(item['head'],sort_keys=True,indent=4)+"</pre></div>")
+        pf.write("<div>request:<br/><pre>"+json.dumps(item['payload']),sort_keys=True,indent=4)+"</pre></div>")
+        pf.write("<div>respons:<br/><pre>"+json.dumps(item['result']),sort_keys=True,indent=4,ensure_ascii=False)+"</pre></div>")
+        pf.write('<div>错误信息：'+str(item['error'])+'</div>')
+        pf.write('<br/><hr>')
+    pf.write('</div>')
+    pf.write('</body>')
+    pf.write('<script type="text/javascript">')
+    pf.write('</script>')
+    pf.write('</html>')
+    
+ 
+ #从csv 读取数据 转换成数组
+def makeCsvData(dataPath):
+    data = []
+    for value in csv.reader(open(dataPath,"r",encoding='utf-8')):
+        data.append(value)
+    return data
+#从txt读取数据
+def makeTxtData(dataPath):
+    return open(dataPath,'r',encoding='utf=8')
+    
+
+#组合查询条件
+#querys:enable/username/nickname datas:true/tangqi/suer
+def makeSearchConditions(querys,datas):
+    _querys = querys.split("/")
+    _datas = datas.split("/")
+    queryObject = {}
+    for index in range(0,len(_querys)):
+        queryObject[_querys[index]]= _data[index]
+     return queryObject
+     
+ #清理操作
+ def clearTestData():
+     print("\n clear")
+     
+ #hashlib md5 字符串
+ def md5(str):
+    _str = str.encode('utf-8')
+    return hashlib.md5(_str).hexdigest()
+    
+ -----------------------------------------------------------------------------------------------------
+#helper/http.py
+#import sys,json,time,random
+from helper import unit,request
+
+def generateUrl(url,params):        #组合url地址
+    return unit.makeRestRrl(url,params)
+    
+def generateHeader(conf):           #组合head 值（某些需要权限验证的接口）
+    return{
+      'Content-Type':'application/vnd.sc-api.vi.json'
+      'Authorization':'beares' + conf.TOKEN
+    }
+
+def fromatParams(data):       #格式化post put 请求参数
+    data['nonce'] = unit.md5(str(time.time()+random.randint(1,99999)))  #请求参数中需要添加nonce的参数
+    return json.dumps(data)   #json格式化参数
+ -----------------------------------------------------------------------------------------------------
+ #helper/request.py
+ #封装request方法 并 记录log run.py运行时传入到htmlreport文件中
+ import sys,time,json,requests,copy
+ import config
+ conf = config.Conf()
+ exec('from helper import http,api')
+ 
+ '''发送请求 apikey: api,data的key值
+ payload post参数
+ urlParam:get参数
+ precondition：是否前置接口'''
+ def action(apikey,payload=None,urlParam=None,precondition=False,file=None):
+    startTime = time.time()
+    localTime = time.trftime("%Y-%m-%d %H:%M:%s",time.localtime())
+    error =None
+    result = None
+    r=api.get(apikey)#封装请求url
+    headers = http.generateHeader(config)  #封装header
+    #组合get rest参数
+    if urlParam and len(urlParam)>0:
+        r['address'] = http.generateUrl(r['address'],urlParam)
+    try:
+        if r['method'] == 'get' or r['method'] == 'delete':
+          if r['method'] == 'get':
+              result = requests.get(r['address'],headers=headers)
+          if r['method'] == 'delete':
+              result = requests.delete(r['address'],headers=headers)
+        if r['method'] == 'post' or r['method'] == 'put' or r['method'] == 'file':
+            payload = payload or eval('req.'+apikey)
+            payload = http.formatParams(payload)
+            payloadClone = copy.deepcopy(payload)
+            if r['method'] == 'post':
+                resutl = request.post(r['address'],data=paylaod,headers=headers)
+            if r['method'] == 'put':
+                resutl = request.put(r['address'],data=paylaod,headers=headers)
+            if r['method'] == 'file':
+                resutl = request.post(r['address'],headers=headers,file=file)
+     except Exception as e:
+        error = e
+     finally:
+        log ={}
+        if precondition:
+            log['type'] = '前置接口'
+        else:
+            log['type'] = '被测接口'
+            
+        log['startTime'] = locaTime
+        log['wasteTime'] = time.time() -startTime
+        log['apiName'] = r['desc']
+        log['address'] = r['address']
+        log['method'] = r['method']
+        log['header'] = headers
+        if log['method'] == 'put' or log['method'] == 'post':
+            log['payload'] = json.loads(payloadClone)
+        else:
+            log['payload'] = None
+        log['error'] = error
+        log['result'] = None
+        try:
+          log['result'] = result.json()
+         except Exception as e:
+            pass
+         conf.LOGS.append(log)
+         try:
+            return result.json()
+         except Exception as e:
+            return None
+       
+ 
+ -----------------------------------------------------------------------------------------------------
+ #testcase/auth.py
+ import unittest,sys
+ import config
+ from helper import request,unit
+ 
+ class Auth(unittest.TestCase):
+    def setUp(self):
+        self.loginfile = open("../xx.txt")
+        self.login = oepn("../xx.txt")
+    def test_a1_getCaptcha(self):
+        result = request.action('CAPTCHA')
+        if result == None:
+            self.assertEqual("resError",1)
+            return
+        if result['data'] != None:
+            config.KEY = result['data']['key']
+        self.assertEqual(result['status'],1000) # 跟进result json 数据 进行相关判断
+        
+     def test_a2_login(self):
+        for line in self.login:
+            loginInfo = eval(line)
+            payload = { 
+                "username":loginInfo[0],
+                "password":unit.md5(unit.md5('')) + unit.md5((loginInfo[1]))
+                "validcode":config.KEY+';'+loginInfo[2]
+            }
+            result = request.action('LOGIN',payload,None,True)  #前置接口传true
+            if result ==None:
+              ...
+            if result['status'] == 10000:
+                config.TOKEN = result['data']['token']        #有token的返回值传入到config变量中 其他接口可调用
+             
+            #result = request.action('KEY',None,getparama)   #get 传参格式 
+        
+ 
+ 
