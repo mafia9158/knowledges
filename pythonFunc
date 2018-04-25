@@ -1,0 +1,7 @@
+python itertools 
+
+import itertools
+itertools.product('0123456789',repeat=num)   #笛卡尔积函数 指定num位数
+
+
+intertools.permutations(['01','02','03','04','05','06'],num)    #按num位数 排列字符
