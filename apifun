@@ -75,36 +75,34 @@ class Conf():
 -----------------------------------------------------------------------------------------------------
 #helper/unit.py  #定义一些常用方法
 import json,codecs,time,csv,sys,hashlib 
- 
- #构建rest风格接口URL资源参
- def makeResultUrl(url,params):
-  uSplit = url.split('$')
-  result = ''
-  for x in range(0,len(uSplit)):
-    result += uSplit[x]
-    if x < len(params):
-      result += str(params[x])
-  return result
- 
+#构建rest风格接口URL资源参
+def makeResultUrl(url,params):
+    uSplit = url.split('$')
+    result = ''
+    for x in range(0,len(uSplit)):
+        result += uSplit[x]
+        if x < len(params):
+            result += str(params[x])
+    return result
+
  #生成详细报告
- def makeDetailReport(fileDir,reportName,excuteTime,Ttile,Logs):
-    fileName = fileDir
-    pf = codecs.open(fileName +'.html','w+','utf-8')
+def makeDetailReport(fileDir,reportName,excuteTime,title,Logs):
+    pf = codecs.open(fileDir,'w+','utf-8')
     pf.write('<html>')
-    pr.write('<head>')
-    pf.write('  <title>'+Title+'</title>')
-    pf.write('  <meta charset="utf-8">')
-    pf.write('  <script tu[e="text/javascript" src="jquery.min.js"></stript>')    #可以下载这个js 放到指定路径下这里获取
-    pf.write('  <link rel="stylesheet" type="text/css" herf="amazeui.min.css">')  #可以下载这个css 放到指定路径下这里获取
+    pf.write('<head>')
+    pf.write('  <title>'+title+'</title>')
+    pf.write('  <meta charset="utf-8"/>')
+    pf.write('  <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>')    #可以下载这个js 放到指定路径下这里获取
+    pf.write('  <link rel="stylesheet" type="text/css" href="amazeui.min.css">')  #可以下载这个css 放到指定路径下这里获取
     pf.write('</head>')
     pf.write('<body>')
     pf.write('<div class="am-container" style="background-color:white;">')
     pf.write('<h1 style="text-align: center; margin-top: 20px;">'+title+'</h1>')
     pf.write('<hr>')
-    pf.write("<h2> 报告生成时间："+time.strftime("%Y-%m-%d %H:%M:%s",time.localtime())+"</h2>")
+    pf.write("<h2> 报告生成时间："+time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())+"</h2>")
     pf.write('<hr>')
-    pf.write('<iframe src="'+reportName+'" style="height:400px;width:120%>" </iframe>')
-    for item in logs:
+    # pf.write('<iframe src="'+reportName+'" style="height:400px;width:120%"></iframe>')
+    for item in Logs:
         result = '<span style = "color:green">调用成功</span>'
         if item['error']:
           result = '<span style = "color:green">调用失败</span>'
@@ -112,20 +110,20 @@ import json,codecs,time,csv,sys,hashlib
             if item['result']['error']:
                 result = '<span style = "color:green">调用失败</span>'
         except Exception as e:
-          pass
+            pass
         pf.write("<h2>测试接口："+item['apiName']+"</h2>")
         pf.write("<div>调用类型："+item['type']+"</div>")
-        pf.write("<div调用结果：>"+result+"</div>")
-        pf.write("<div>调用方法"+item['method']+"</div>")
+        pf.write("<div>调用结果："+result+"</div>")
+        pf.write("<div>调用方法："+item['method']+"</div>")
         pf.write("<div>调用时间："+item['startTime']+"</div>")
-        pf.write("<div>接口响应时间：<code>"+str(item['wasteTiem'])+"</code></div>")
+        pf.write("<div>接口响应时间：<code>"+str(item['wasteTime'])+"</code></div>")
         pf.write("<div>接口地址:<br/><pre>"+item['address']+"</pre></div>")
-        pf.write("<div>head:<br/><pre>"+json.dumps(item['head'],sort_keys=True,indent=4)+"</pre></div>")
-        pf.write("<div>request:<br/><pre>"+json.dumps(item['payload']),sort_keys=True,indent=4)+"</pre></div>")
-        pf.write("<div>respons:<br/><pre>"+json.dumps(item['result']),sort_keys=True,indent=4,ensure_ascii=False)+"</pre></div>")
+        pf.write("<div>head:<br/><pre>"+json.dumps(item['header'],sort_keys=True,indent=4)+"</pre></div>")
+        pf.write("<div>request:<br/><pre>"+json.dumps(item['payload'],sort_keys=True,indent=4)+"</pre></div>")
+        pf.write("<div>respons:<br/><pre>"+json.dumps(item['result'],sort_keys=True,indent=4,ensure_ascii=False)+"</pre></div>")
         pf.write('<div>错误信息：'+str(item['error'])+'</div>')
         pf.write('<br/><hr>')
-    pf.write('</div>')
+    # pf.write('</div>')
     pf.write('</body>')
     pf.write('<script type="text/javascript">')
     pf.write('</script>')
@@ -151,82 +149,66 @@ def makeSearchConditions(querys,datas):
     queryObject = {}
     for index in range(0,len(_querys)):
         queryObject[_querys[index]]= _data[index]
-     return queryObject
+    return queryObject
      
  #清理操作
- def clearTestData():
-     print("\n clear")
+def clearTestData():
+    print("\n clear")
      
  #hashlib md5 字符串
- def md5(str):
+def md5(str):
     _str = str.encode('utf-8')
     return hashlib.md5(_str).hexdigest()
-    
- -----------------------------------------------------------------------------------------------------
-#helper/http.py
-#import sys,json,time,random
-from helper import unit,request
-
-def generateUrl(url,params):        #组合url地址
-    return unit.makeRestRrl(url,params)
-    
-def generateHeader(conf):           #组合head 值（某些需要权限验证的接口）
-    return{
-      'Content-Type':'application/vnd.sc-api.vi.json'
-      'Authorization':'beares' + conf.TOKEN
-    }
-
-def fromatParams(data):       #格式化post put 请求参数
-    data['nonce'] = unit.md5(str(time.time()+random.randint(1,99999)))  #请求参数中需要添加nonce的参数
-    return json.dumps(data)   #json格式化参数
  -----------------------------------------------------------------------------------------------------
  #helper/request.py
  #封装request方法 并 记录log run.py运行时传入到htmlreport文件中
- import sys,time,json,requests,copy
- import config
- conf = config.Conf()
- exec('from helper import http,api')
- 
- '''发送请求 apikey: api,data的key值
+import sys,time,json,requests,copy
+from Helper import http,api,config
+conf = config.conf()
+
+'''
+ 发送请求 apikey: api,data的key值
  payload post参数
  urlParam:get参数
- precondition：是否前置接口'''
- def action(apikey,payload=None,urlParam=None,precondition=False,file=None):
+ precondition：是否前置接口
+ '''
+def action(apikey,payload=None,urlParam=None,precondition=False,file=None):
     startTime = time.time()
-    localTime = time.trftime("%Y-%m-%d %H:%M:%s",time.localtime())
-    error =None
+    localTime = time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())
+    error = None
     result = None
-    r=api.get(apikey)#封装请求url
+    r = api.get(apikey)#封装请求url
     headers = http.generateHeader(config)  #封装header
+    payloadClone = ''
     #组合get rest参数
     if urlParam and len(urlParam)>0:
         r['address'] = http.generateUrl(r['address'],urlParam)
     try:
         if r['method'] == 'get' or r['method'] == 'delete':
-          if r['method'] == 'get':
-              result = requests.get(r['address'],headers=headers)
-          if r['method'] == 'delete':
-              result = requests.delete(r['address'],headers=headers)
+            if r['method'] == 'get':
+                result = requests.get(r['address'],headers=headers)
+            if r['method'] == 'delete':
+                result = requests.delete(r['address'],headers=headers)
         if r['method'] == 'post' or r['method'] == 'put' or r['method'] == 'file':
             payload = payload or eval('req.'+apikey)
             payload = http.formatParams(payload)
             payloadClone = copy.deepcopy(payload)
             if r['method'] == 'post':
-                resutl = request.post(r['address'],data=paylaod,headers=headers)
+                result = requests.post(r['address'],data = payload,headers=headers)
             if r['method'] == 'put':
-                resutl = request.put(r['address'],data=paylaod,headers=headers)
+                result = requests.put(r['address'],data = payload,headers=headers)
             if r['method'] == 'file':
-                resutl = request.post(r['address'],headers=headers,file=file)
-     except Exception as e:
+                result = requests.post(r['address'],headers = headers,file=file)
+    except Exception as e:
         error = e
-     finally:
-        log ={}
+    finally:
+        log = {}
         if precondition:
             log['type'] = '前置接口'
         else:
             log['type'] = '被测接口'
             
-        log['startTime'] = locaTime
+        log['startTime'] = localTime
         log['wasteTime'] = time.time() -startTime
         log['apiName'] = r['desc']
         log['address'] = r['address']
@@ -239,13 +221,13 @@ def fromatParams(data):       #格式化post put 请求参数
         log['error'] = error
         log['result'] = None
         try:
-          log['result'] = result.json()
-         except Exception as e:
+            log['result'] = result.json()
+        except Exception as e:
             pass
-         conf.LOGS.append(log)
-         try:
+        conf.Logs.append(log)
+        try:
             return result.json()
-         except Exception as e:
+        except Exception as e:
             return None
        
  
