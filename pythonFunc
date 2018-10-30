@@ -5,3 +5,14 @@ itertools.product('0123456789',repeat=num)   #笛卡尔积函数 指定num位数
 
 
 intertools.permutations(['01','02','03','04','05','06'],num)    #按num位数 排列字符
+
+#------------------------------------------------
+#根据字符参数名 返回函数对象，并可向该函数传递多维参数
+def test_func(self,funcall,**kwargs):
+    return getattr(self,funcall)(**kwargs)
+   
+#根据字典参数执行对应函数体并传递函数变量
+for k,v in kwargs.items():
+   getattr(self,k)(v)
+这2个形式合理使用 可以作为关键字编程的主要逻辑，避免写 大量字符串判断语句
+#------------------------------------------------
